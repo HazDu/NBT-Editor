@@ -1,0 +1,35 @@
+{
+  "name": "nbt-editor",
+  "private": true,
+  "version": "1.0.0",
+  "description": "NBT-Editor: a browser-based Minecraft NBT editor. All files are processed locally.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "bench": "vitest run tests/unit/perf.test.ts --reporter=verbose",
+    "icons": "node scripts/gen-icons.mjs && node scripts/gen-icon-map.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.2",
+    "@types/node": "^26.6.10",
+    "svelte": "^5.59.1",
+    "svelte-check": "^4.7.8",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.1"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@material-symbols/svg-400": "^0.49.0"
+  }
+}

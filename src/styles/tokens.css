@@ -1,0 +1,124 @@
+/* "Basalt & Magma" design tokens. Every color in the app comes from here. */
+
+:root {
+  color-scheme: dark;
+  --font-ui: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* basalt neutrals (dark default) */
+  --bg: #16130f;
+  --surface: #1e1a16;
+  --surface-2: #27221c;
+  --surface-3: #312a22;
+  --border: #3a322a;
+  --border-strong: #4d4237;
+  --text: #ede6dc;
+  --text-2: #c9beb0;
+  --muted: #a39787;
+  --faint: #6f6457;
+
+  /* magma */
+  --accent: #ff7a1a;
+  --accent-strong: #ff8f3d;
+  --accent-ink: #1a0e04;
+  --accent-soft: rgb(255 122 26 / 0.14);
+  --accent-line: rgb(255 122 26 / 0.55);
+  --danger: #e2412b;
+  --danger-soft: rgb(226 65 43 / 0.16);
+  --ok: #8fbf6a;
+  --warn: #e8b547;
+
+  /* tag type colors */
+  --t-int: #6fa8dc;
+  --t-float: #4fb8a8;
+  --t-string: #9cc56b;
+  --t-list: #e8b547;
+  --t-compound: #ff8a3d;
+  --t-array: #a99bd3;
+  --t-muted: #8a7f72;
+
+  --row-hover: rgb(255 255 255 / 0.035);
+  --row-select: rgb(255 122 26 / 0.13);
+  --row-select-strong: rgb(255 122 26 / 0.22);
+  --guide: rgb(255 255 255 / 0.06);
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+  --scrim: rgb(10 8 6 / 0.6);
+
+  --radius: 5px;
+  --radius-sm: 3px;
+  --row-h: 26px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f6f1ea;
+    --surface: #fffdf9;
+    --surface-2: #f0e9df;
+    --surface-3: #e7ddd0;
+    --border: #ded4c6;
+    --border-strong: #c9bba8;
+    --text: #221c16;
+    --text-2: #43392f;
+    --muted: #75685a;
+    --faint: #a6998a;
+    --accent: #d95f0e;
+    --accent-strong: #c4520a;
+    --accent-ink: #ffffff;
+    --accent-soft: rgb(217 95 14 / 0.1);
+    --accent-line: rgb(217 95 14 / 0.5);
+    --danger: #c23520;
+    --danger-soft: rgb(194 53 32 / 0.1);
+    --ok: #4f8a2c;
+    --warn: #a9760c;
+    --t-int: #2f6fb0;
+    --t-float: #1d8577;
+    --t-string: #4f8a2c;
+    --t-list: #a9760c;
+    --t-compound: #c4520a;
+    --t-array: #6a58a8;
+    --t-muted: #8a7f72;
+    --row-hover: rgb(0 0 0 / 0.035);
+    --row-select: rgb(217 95 14 / 0.1);
+    --row-select-strong: rgb(217 95 14 / 0.18);
+    --guide: rgb(0 0 0 / 0.07);
+    --shadow: 0 8px 24px rgb(60 40 20 / 0.18);
+    --scrim: rgb(40 30 20 / 0.35);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f1ea;
+  --surface: #fffdf9;
+  --surface-2: #f0e9df;
+  --surface-3: #e7ddd0;
+  --border: #ded4c6;
+  --border-strong: #c9bba8;
+  --text: #221c16;
+  --text-2: #43392f;
+  --muted: #75685a;
+  --faint: #a6998a;
+  --accent: #d95f0e;
+  --accent-strong: #c4520a;
+  --accent-ink: #ffffff;
+  --accent-soft: rgb(217 95 14 / 0.1);
+  --accent-line: rgb(217 95 14 / 0.5);
+  --danger: #c23520;
+  --danger-soft: rgb(194 53 32 / 0.1);
+  --ok: #4f8a2c;
+  --warn: #a9760c;
+  --t-int: #2f6fb0;
+  --t-float: #1d8577;
+  --t-string: #4f8a2c;
+  --t-list: #a9760c;
+  --t-compound: #c4520a;
+  --t-array: #6a58a8;
+  --t-muted: #8a7f72;
+  --row-hover: rgb(0 0 0 / 0.035);
+  --row-select: rgb(217 95 14 / 0.1);
+  --row-select-strong: rgb(217 95 14 / 0.18);
+  --guide: rgb(0 0 0 / 0.07);
+  --shadow: 0 8px 24px rgb(60 40 20 / 0.18);
+  --scrim: rgb(40 30 20 / 0.35);
+}
