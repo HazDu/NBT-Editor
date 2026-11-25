@@ -36,8 +36,7 @@
 
     if (ctrl && !e.shiftKey && k === 'o') return run('open');
     if (ctrl && e.shiftKey && k === 'o') return run('openFolder');
-    if (ctrl && !e.shiftKey && k === 's') return run('save');
-    if (ctrl && e.shiftKey && k === 's') return run('export');
+    if (ctrl && k === 's') return run('download');
     if (ctrl && e.shiftKey && k === 'f') return run('findValue');
     if (ctrl && k === 'f') return run('find');
     if (e.key === 'F3') {

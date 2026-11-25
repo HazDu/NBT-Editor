@@ -3,9 +3,9 @@
 A modern, browser-based editor for Minecraft NBT data. It is a rewrite of the desktop app
 [NBTExplorer](NBTExplorer-master/) as a static website.
 
-**Your files never leave your device.** After the page has loaded, every file is parsed, edited and saved inside the
-browser tab. The production build sets a Content-Security-Policy with `connect-src 'self'`, so the page cannot send
-data anywhere. The app works offline and can be installed as a PWA.
+**Your files never leave your device.** After the page has loaded, every file is parsed and edited inside the browser
+tab, and the result is handed back to you as a download; files on disk are never overwritten. The production build
+sets a Content-Security-Policy with `connect-src 'self'`, so the page cannot send data anywhere. The app works offline and can be installed as a PWA.
 
 ## Features
 
@@ -32,8 +32,8 @@ data anywhere. The app works offline and can be installed as a PWA.
   - unloaded region chunks are searched in a Web Worker
 - **Git-like change log:** undo/redo, and a Changes panel with "jump to" and "revert this change". Tree rows show
   markers for changed tags.
-- **Save & export:**
-  - Chrome/Edge save in place through the File System Access API; other browsers download the files.
+- **Download** (Ctrl+S):
+  - Edited files are downloaded; the app never writes to your disk directly, so there is no separate "Save".
   - Optional **`<filename>.backup`** of the untouched original. The backup is streamed byte for byte from the
     original file on disk, so it uses no extra RAM. If that file can no longer be read, the backup is rebuilt by
     rewinding the change log.

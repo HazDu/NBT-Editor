@@ -20,15 +20,20 @@ async function dropFiles(page: Page, files: { name: string; data: Uint8Array }[]
 const row = (page: Page, text: string) => page.locator('.slot').filter({ hasText: text }).first();
 
 let foreign: string[] = [];
+let pageErrors: string[] = [];
 test.beforeEach(async ({ page, baseURL }) => {
   foreign = [];
+  pageErrors = [];
   page.on('request', (r) => {
     const u = r.url();
     if (!u.startsWith(baseURL!) && !u.startsWith('data:') && !u.startsWith('blob:')) foreign.push(u);
   });
+  // Uncaught errors (e.g. Svelte's effect_update_depth_exceeded) must fail the test.
+  page.on('pageerror', (e) => pageErrors.push(e.message));
 });
 test.afterEach(() => {
   expect(foreign, 'the app must not contact any other origin').toEqual([]);
+  expect(pageErrors, 'the page must not throw uncaught errors').toEqual([]);
 });
 
 test('empty state explains what to do', async ({ page }) => {
@@ -38,7 +43,7 @@ test('empty state explains what to do', async ({ page }) => {
   await page.screenshot({ path: 'test-results/screens/01-empty.png' });
 });
 
-test('open, edit, undo, search and export with backup', async ({ page }) => {
+test('open, edit, undo, search and download with backup', async ({ page }) => {
   const original = await levelDat();
   await page.goto('/');
   await dropFiles(page, [{ name: 'level.dat', data: original }]);
@@ -87,9 +92,10 @@ test('open, edit, undo, search and export with backup', async ({ page }) => {
   await page.getByRole('button', { name: 'Changes' }).first().click();
   await expect(page.locator('.entry')).toHaveCount(2);
 
-  // Export with backup → two downloads
-  await page.keyboard.press('Control+Shift+S');
-  await expect(page.getByRole('heading', { name: 'Save & export' })).toBeVisible();
+  // Download with backup → two files; there is a single Download action (no in-place save)
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toHaveCount(0);
+  await page.keyboard.press('Control+S');
+  await expect(page.getByRole('heading', { name: 'Download' })).toBeVisible();
   await page.screenshot({ path: 'test-results/screens/03-export.png' });
   const downloads: { name: string; path: string }[] = [];
   page.on('download', async (d) => downloads.push({ name: d.suggestedFilename(), path: await d.path() }));
@@ -147,7 +153,7 @@ test('region files: lazy chunks incl. LZ4, edit, export copies untouched chunks'
   await page.locator('.value-edit').press('Enter');
   await page.screenshot({ path: 'test-results/screens/05-region.png' });
 
-  await page.keyboard.press('Control+Shift+S');
+  await page.keyboard.press('Control+S');
   const downloads: { name: string; path: string }[] = [];
   page.on('download', async (d) => downloads.push({ name: d.suggestedFilename(), path: await d.path() }));
   await page.getByRole('button', { name: 'Download', exact: true }).click();

@@ -46,7 +46,7 @@
         <dt>{p.os}</dt><dd><code>{p.path}</code></dd>
       {/each}
     </dl>
-    <p class="hint">Tip: work on a copy of your world, or keep "Export original as .backup" switched on when saving.</p>
+    <p class="hint">Tip: work on a copy of your world, or keep "Also download the original as .backup" switched on.</p>
 
     <h2 class="label">Good to know</h2>
     <ul class="tips">

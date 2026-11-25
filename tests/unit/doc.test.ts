@@ -85,11 +85,11 @@ describe('journal & actions', () => {
     expect(ws.journal.entries).toHaveLength(3);
   });
 
-  it('rewinds to the on-disk state to rebuild a backup', async () => {
+  it('rewinds to the original to rebuild a backup', async () => {
     const { ws, node } = await openSample();
     actions.setValue(ws, find(ws, 'int'), 7);
-    const raw = ws.journal.atSavePoint(() => cloneTag(node.root!.tag));
-    expect(tagEquals(raw!, sampleRoot().tag)).toBe(true);
+    const raw = ws.journal.atOriginal(() => cloneTag(node.root!.tag));
+    expect(tagEquals(raw, sampleRoot().tag)).toBe(true);
     expect((node.root!.tag as CompoundTag).value.get('int')).toEqual(int(7));
   });
 });

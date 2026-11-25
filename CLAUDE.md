@@ -17,15 +17,19 @@ A browser-based Minecraft NBT editor (rewrite of the 2011–2017 C# app NBTExplo
   downstream goes stale. Derive display data from the `row` object itself (rebuilt on every version bump), or wrap
   values in a fresh object per version (see `TreeRow.svelte` `v`, `Inspector.svelte` `s`). Command availability in
   templates must go through `isEnabled()` (`src/ui/reactive.svelte.ts`).
-- Keep the original file `File`/`Blob` around as the backup source — it lives on disk, not in RAM. When overwriting a
-  file in place, write the `.backup` first.
+- **Effects that initialise state** (e.g. when a dialog opens): read only the trigger, then do the writes inside
+  `untrack()`. Reading a `$state` right after assigning it in the same effect makes the effect depend on itself →
+  `effect_update_depth_exceeded` and a frozen page (see the export effect in `Dialogs.svelte`).
+- **Output is download-only.** There is no in-place save (it was removed for UI simplicity): never write through
+  File System Access handles; pickers open read-only. One `download` command (Ctrl+S) opens the Download dialog.
+- Keep the original file `File`/`Blob` around as the backup source — it lives on disk, not in RAM.
 
 ## Layout
 - `src/lib/nbt/` format core: `types` (tag model), `mutf8`, `reader` (iterative, explicit stack), `writer`,
   `compression` (native Compression Streams), `lz4` (lz4-java `LZ4Block` format + xxHash32), `nbtfile`
   (format sniffing: gzip/zlib/raw, BE/LE, Bedrock header), `region` (Anvil, lazy chunks, compression ids 1/2/3/4/127, `.mcc`),
   `snbt`, `format` (previews, input validation, paths), `dataversion`.
-- `src/lib/doc/` workspace model: source nodes (folder → file → region → chunk), Journal, clipboard, save/export.
+- `src/lib/doc/` workspace model: source nodes (folder → file → region → chunk), Journal, clipboard, download (`export.ts`).
 - `src/lib/search/` query compilation + search (worker for unloaded region chunks).
 - `src/lib/fs/` File System Access API with `<input>`/download fallbacks.
 - `src/ui/` Svelte components; `src/styles/tokens.css` holds every color/spacing token.
@@ -42,7 +46,9 @@ A browser-based Minecraft NBT editor (rewrite of the 2011–2017 C# app NBTExplo
   (regenerates `src/ui/icons.ts`, only listed icons ship). `node scripts/gen-icons.mjs` regenerates favicon/PWA icons
   from `public/icon.png`.
 - Before finishing a change: `npm run check && npm test && npm run e2e`. E2E tests drop synthetic fixtures
-  (`tests/e2e/fixtures.ts`) and fail if any request leaves the origin.
+  (`tests/e2e/fixtures.ts`) and fail if any request leaves the origin or the page throws an uncaught error. They run
+  against the production build; some Svelte errors only throw in dev, so for UI-state changes also run the suite
+  against `npm run dev` once.
 
 ## Minecraft format notes
 - Java NBT is big-endian with **Modified UTF-8** strings; Bedrock is little-endian with UTF-8 and `level.dat` has an

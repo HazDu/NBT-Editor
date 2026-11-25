@@ -176,7 +176,7 @@
 
   {#if v.rootName}<span class="root-name mono">"{v.rootName}"</span>{/if}
 
-  {#if inner && !changed}<span class="inner-dot" title="Contains unsaved changes"></span>{/if}
+  {#if inner && !changed}<span class="inner-dot" title="Contains changes not downloaded yet"></span>{/if}
 
   {#if editing === 'value'}
     <span class="sep">:</span>

@@ -4,7 +4,6 @@
  */
 import * as actions from '../lib/doc/actions';
 import { copyItems, hasClipboard, itemsForPastedText, snbtFor } from '../lib/doc/clipboard';
-import { canSaveInPlace, saveWorkspace } from '../lib/doc/export';
 import { FolderNode, newEmptyFile, nodeForFile, Workspace } from '../lib/doc/model';
 import { rowPath, type Row } from '../lib/doc/rows';
 import { pickDirectory, pickFiles, type DirLike, type PickedFile } from '../lib/fs/access';
@@ -99,29 +98,6 @@ async function openFolder(): Promise<void> {
     if (dir) openDirectory(dir);
   } catch (e) {
     app.toast('error', `Could not open folder: ${(e as Error).message}`);
-  }
-}
-
-// --------------------------------------------------------------------------------------- saving
-
-export async function save(): Promise<void> {
-  const t = tab();
-  if (!t) return;
-  const files = t.ws.dirtyFiles();
-  if (files.length === 0) {
-    app.toast('info', 'No unsaved changes. Use Export to download a copy.');
-    return;
-  }
-  if (!files.every(canSaveInPlace)) {
-    app.dialog = { kind: 'export', tab: t };
-    return;
-  }
-  try {
-    const reports = await saveWorkspace(t.ws, files, { backup: app.backupOnSave });
-    const b = reports.filter((r) => r.backup === 'written' || r.backup === 'downloaded').length;
-    app.toast('ok', `Saved ${reports.map((r) => r.name).join(', ')}${b ? ` · ${b} backup${b > 1 ? 's' : ''} created` : ''}`);
-  } catch (e) {
-    app.toast('error', `Save failed: ${(e as Error).message}`);
   }
 }
 
@@ -244,11 +220,7 @@ def({
   run: () => { app.addTab(new Workspace(newEmptyFile())); },
 });
 def({
-  id: 'save', label: 'Save', icon: 'save', keys: 'Ctrl+S', group: 'File',
-  enabled: () => !!app.active?.ws.isDirty, run: save,
-});
-def({
-  id: 'export', label: 'Export / download…', icon: 'download', keys: 'Ctrl+Shift+S', group: 'File', enabled: hasTab,
+  id: 'download', label: 'Download…', icon: 'download', keys: 'Ctrl+S', group: 'File', enabled: hasTab,
   run: () => { if (app.active) app.dialog = { kind: 'export', tab: app.active }; },
 });
 def({

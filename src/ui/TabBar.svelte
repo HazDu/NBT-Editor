@@ -32,7 +32,7 @@
     >
       <Icon name={icon(t)} size={16} fill={t.ws.root.kind === 'folder'} />
       <span class="name">{t.title}</span>
-      {#if isDirty(t)}<span class="dot" title="Unsaved changes"></span>{/if}
+      {#if isDirty(t)}<span class="dot" title="Changes not downloaded yet"></span>{/if}
       <button class="close" title="Close (Alt+W)" aria-label="Close {t.title}" onclick={(e) => { e.stopPropagation(); requestClose(t); }}>
         <Icon name="close" size={14} />
       </button>

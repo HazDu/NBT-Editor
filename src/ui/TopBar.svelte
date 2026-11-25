@@ -8,7 +8,7 @@
 
   const groups: { id: string; label?: boolean; primary?: boolean }[][] = [
     [{ id: 'open', label: true }, { id: 'openFolder', label: true }, { id: 'newFile' }],
-    [{ id: 'save', label: true, primary: true }, { id: 'export', label: true }],
+    [{ id: 'download', label: true, primary: true }],
     [{ id: 'undo' }, { id: 'redo' }],
     [{ id: 'cut' }, { id: 'copy' }, { id: 'paste' }, { id: 'delete' }],
     [{ id: 'rename' }, { id: 'editValue' }, { id: 'duplicate' }],

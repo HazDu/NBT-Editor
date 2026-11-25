@@ -157,8 +157,6 @@ export class Journal {
   index = 0;
   /** value of `index` at the last save (-1 = the save point was discarded by a new branch) */
   savedIndex = 0;
-  /** value of `index` matching the files on disk (only moves on in-place saves) */
-  diskIndex = 0;
   onChange: (() => void) | null = null;
   private markerCache: { direct: Map<Tag, number>; ancestor: Set<Tag>; key: string } | null = null;
 
@@ -168,7 +166,6 @@ export class Journal {
     // Committing after undo discards the redo branch (like a new commit on a rewound branch).
     if (this.index < this.entries.length) {
       if (this.savedIndex > this.index) this.savedIndex = -1;
-      if (this.diskIndex > this.index) this.diskIndex = -1;
       this.entries.length = this.index;
     }
     const entry: Entry = { ...e, id: entryId++, time: Date.now() };
@@ -218,10 +215,9 @@ export class Journal {
     return this.index !== this.savedIndex;
   }
 
-  /** @param onDisk true when the files were overwritten in place (not just downloaded) */
-  markSaved(onDisk = false): void {
+  /** Called after a download: the current state becomes the "saved" state (clears dirty markers). */
+  markSaved(): void {
     this.savedIndex = this.index;
-    if (onDisk) this.diskIndex = this.index;
     this.changed();
   }
 
@@ -245,22 +241,18 @@ export class Journal {
   }
 
   /**
-   * Temporarily rewinds to the state of the files on disk, runs `fn` synchronously,
-   * then restores the current state. Used to rebuild a `.backup` when the original File can no
-   * longer be read. Returns null if the save point is unreachable.
+   * Temporarily rewinds to the original as opened (files on disk are never overwritten), runs `fn`
+   * synchronously, then restores the current state. Used to rebuild a `.backup` when the original
+   * File can no longer be read.
    */
-  atSavePoint<T>(fn: () => T): T | null {
-    if (this.diskIndex < 0) return null;
+  atOriginal<T>(fn: () => T): T {
     const cur = this.index;
-    const target = this.diskIndex;
     const quiet = this.onChange;
     this.onChange = null;
     try {
-      while (this.index > target) this.undo();
-      while (this.index < target) this.redo();
+      while (this.index > 0) this.undo();
       return fn();
     } finally {
-      while (this.index > cur) this.undo();
       while (this.index < cur) this.redo();
       this.onChange = quiet;
     }

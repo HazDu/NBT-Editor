@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import Icon from './Icon.svelte';
   import TypeBadge from './TypeBadge.svelte';
   import { app, type Tab } from './state.svelte';
   import { commands } from './commands';
   import * as actions from '../lib/doc/actions';
-  import { canSaveInPlace, saveWorkspace } from '../lib/doc/export';
+  import { saveWorkspace } from '../lib/doc/export';
   import { parsePrimitive } from '../lib/nbt/format';
   import { parseSnbt, toSnbt } from '../lib/nbt/snbt';
   import { defaultTag, TAG_META, TagType, countTags, type Compression, type Tag } from '../lib/nbt/types';
@@ -34,31 +35,34 @@
     return r.kind === 'nbt' || r.kind === 'region' ? [r] : [];
   }
 
+  // Only re-initialise when the dialog opens. The writes must stay untracked: reading
+  // `exportFiles` right after assigning it would make this effect depend on itself (infinite loop).
   $effect(() => {
-    if (d?.kind === 'export') {
-      exportFiles = filesFor(d.tab);
-      selected = new Set(exportFiles);
+    const cur = d;
+    if (cur?.kind !== 'export') return;
+    untrack(() => {
+      const files = filesFor(cur.tab);
+      exportFiles = files;
+      selected = new Set(files);
       compression = 'keep';
       busy = false;
-    }
+    });
   });
 
-  const anyInPlace = $derived(exportFiles.some((f) => selected.has(f) && canSaveInPlace(f)));
-
-  async function doExport(tab: Tab, download: boolean): Promise<void> {
+  async function doExport(tab: Tab): Promise<void> {
     const files = exportFiles.filter((f) => selected.has(f));
     if (!files.length) return;
     busy = true;
     try {
       if (compression !== 'keep') for (const f of files) if (f.kind === 'nbt' && !f.format.bedrockHeader) f.format = { ...f.format, compression };
-      const reports = await saveWorkspace(tab.ws, files, { backup: app.backupOnSave, download });
-      const backups = reports.filter((r) => r.backup === 'written' || r.backup === 'downloaded').length;
+      const reports = await saveWorkspace(tab.ws, files, { backup: app.backupOnSave });
+      const backups = reports.filter((r) => r.backup === 'downloaded').length;
       const unavailable = reports.filter((r) => r.backup === 'unavailable').length;
-      app.toast('ok', `${download ? 'Downloaded' : 'Saved'} ${reports.length} file${reports.length > 1 ? 's' : ''}${backups ? ` + ${backups} .backup` : ''}`);
+      app.toast('ok', `Downloaded ${reports.length} file${reports.length > 1 ? 's' : ''}${backups ? ` + ${backups} .backup` : ''}`);
       if (unavailable) app.toast('warn', `${unavailable} backup(s) could not be created (no original available)`);
       close();
     } catch (e) {
-      app.toast('error', `Export failed: ${(e as Error).message}`);
+      app.toast('error', `Download failed: ${(e as Error).message}`);
     } finally {
       busy = false;
     }
@@ -131,12 +135,6 @@
   }
 
   // ------------------------------------------------------------------------- confirm close
-  async function saveAndClose(tab: Tab): Promise<void> {
-    if (tab.ws.dirtyFiles().every(canSaveInPlace)) {
-      await commands.save.run();
-      if (!tab.ws.isDirty) { app.closeTab(tab); close(); }
-    } else app.dialog = { kind: 'export', tab };
-  }
 
   const groups = ['File', 'Edit', 'Tree', 'Search', 'View', 'Help'] as const;
 </script>
@@ -144,9 +142,9 @@
 <dialog bind:this={dlg} onclose={() => (app.dialog = null)} onclick={(e) => { if (e.target === dlg) close(); }}>
   {#if d?.kind === 'export'}
     <div class="panel wide">
-      <h2><Icon name="download" size={20} /> Save & export</h2>
+      <h2><Icon name="download" size={20} /> Download</h2>
       {#if exportFiles.length === 0}
-        <p class="hint">Nothing to export yet. Open a file inside this folder and edit it first.</p>
+        <p class="hint">Nothing to download yet. Open a file inside this folder and edit it first.</p>
       {:else}
         <ul class="files">
           {#each exportFiles as f (f.id)}
@@ -156,16 +154,14 @@
                 <Icon name={f.kind === 'region' ? 'grid_view' : 'description'} size={17} />
                 <span class="fname">{f.name}</span>
               </label>
-              <span class="where">{canSaveInPlace(f) ? 'saves in place' : 'downloads'}</span>
             </li>
           {/each}
         </ul>
 
         <label class="checkbox backup">
           <input type="checkbox" checked={app.backupOnSave} onchange={(e) => app.setBackup((e.target as HTMLInputElement).checked)} />
-          <span><b>Also export the original as <code>&lt;filename&gt;.backup</code></b><br />
-            <span class="hint">The untouched original, byte for byte. It is streamed from your disk, so no extra memory is used.
-              {#if anyInPlace}When saving in place, the backup is written before the file is overwritten.{/if}</span></span>
+          <span><b>Also download the original as <code>&lt;filename&gt;.backup</code></b><br />
+            <span class="hint">The untouched original, byte for byte. It is streamed from your disk, so no extra memory is used.</span></span>
         </label>
 
         {#if exportFiles.some((f) => f.kind === 'nbt' && !f.format.bedrockHeader)}
@@ -183,10 +179,7 @@
       <div class="actions">
         <button class="btn" onclick={close}>Cancel</button>
         <span class="grow"></span>
-        <button class="btn" disabled={busy || !selected.size} onclick={() => d.kind === 'export' && doExport(d.tab, true)}><Icon name="download" size={17} /> Download</button>
-        {#if anyInPlace}
-          <button class="btn primary" disabled={busy || !selected.size} onclick={() => d.kind === 'export' && doExport(d.tab, false)}><Icon name="save" size={17} /> Save in place</button>
-        {/if}
+        <button class="btn primary" disabled={busy || !selected.size} onclick={() => d.kind === 'export' && doExport(d.tab)}><Icon name="download" size={17} /> Download</button>
       </div>
     </div>
   {:else if d?.kind === 'addTag'}
@@ -234,12 +227,12 @@
   {:else if d?.kind === 'confirmClose'}
     <div class="panel">
       <h2><Icon name="warning" size={20} /> Unsaved changes</h2>
-      <p><b>{d.tab.title}</b> has changes that are not saved. Closing the tab discards them.</p>
+      <p><b>{d.tab.title}</b> has changes that were not downloaded yet. Closing the tab discards them.</p>
       <div class="actions">
         <button class="btn" onclick={close}>Cancel</button>
         <span class="grow"></span>
         <button class="btn danger" onclick={() => { if (d.kind === 'confirmClose') app.closeTab(d.tab); close(); }}><Icon name="delete" size={17} /> Discard</button>
-        <button class="btn primary" onclick={() => d.kind === 'confirmClose' && saveAndClose(d.tab)}><Icon name="save" size={17} /> Save…</button>
+        <button class="btn primary" onclick={() => { if (d.kind === 'confirmClose') app.dialog = { kind: 'export', tab: d.tab }; }}><Icon name="download" size={17} /> Download…</button>
       </div>
     </div>
   {:else if d?.kind === 'shortcuts'}
@@ -347,10 +340,6 @@
   }
   .fname {
     font-weight: 500;
-  }
-  .where {
-    color: var(--muted);
-    font-size: 12px;
   }
   .backup {
     align-items: flex-start;

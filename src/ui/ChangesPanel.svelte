@@ -54,7 +54,7 @@
       {#if view.entries.length === 0}
         No changes yet.
       {:else}
-        {view.index} applied · {view.entries.length - view.index} undone{view.unsaved ? ' · unsaved' : ' · saved'}
+        {view.index} applied · {view.entries.length - view.index} undone{view.unsaved ? ' · not downloaded' : ' · downloaded'}
       {/if}
     </span>
     <span class="grow"></span>
@@ -66,7 +66,7 @@
       {@const pos = view.entries.length - k}
       {@const applied = pos <= view.index}
       {#if pos === view.saved && view.saved !== view.entries.length}
-        <li class="savepoint"><Icon name="save" size={14} /> Saved state</li>
+        <li class="savepoint"><Icon name="download" size={14} /> Downloaded state</li>
       {/if}
       {#if pos === view.index && view.index < view.entries.length}
         <li class="head-marker"><Icon name="chevron_right" size={14} /> You are here</li>

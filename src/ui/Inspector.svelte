@@ -184,7 +184,6 @@
             {#if s.node.source.file}<dt>Size</dt><dd>{formatBytes(s.node.source.file.size)}</dd>{/if}
             {#if s.node.state === 'ready'}<dt>Format</dt><dd>{describeFormat(s.node.format)}</dd>{/if}
             {#if s.node.root}<dt>Root name</dt><dd class="mono">"{s.node.root.name}"</dd>{/if}
-            <dt>Save</dt><dd>{s.node.source.handle ? 'In place (with permission)' : 'As download'}</dd>
           {:else if s.node.kind === 'region'}
             {#if s.node.source.file}<dt>Size</dt><dd>{formatBytes(s.node.source.file.size)}</dd>{/if}
             {#if s.node.coords}<dt>Region</dt><dd>{s.node.coords.rx}, {s.node.coords.rz}</dd>

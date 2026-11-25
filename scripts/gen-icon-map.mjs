@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const ICONS = [
-  'file_open', 'folder_open', 'note_add', 'save', 'save_as', 'download', 'undo', 'redo', 'content_cut', 'content_copy',
+  'file_open', 'folder_open', 'note_add', 'download', 'undo', 'redo', 'content_cut', 'content_copy',
   'content_paste', 'delete', 'edit', 'edit_note', 'add', 'search', 'history', 'light_mode', 'dark_mode', 'help', 'info',
   'close', 'chevron_right', 'arrow_upward', 'arrow_downward', 'data_object', 'data_array', 'format_list_bulleted',
   'text_fields', 'counter_1', 'counter_2', 'counter_3', 'counter_4', 'decimal_increase', 'folder', 'description',

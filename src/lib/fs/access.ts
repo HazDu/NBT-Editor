@@ -1,7 +1,8 @@
 /**
  * File access with progressive enhancement:
- *  - Chromium: File System Access API (open with handles → save in place, folders with write access)
- *  - Others: <input type=file> / <input webkitdirectory> and downloads.
+ *  - Chromium: File System Access API pickers (read-only; handles let files be re-read from disk)
+ *  - Others: <input type=file> / <input webkitdirectory>.
+ * Output is always a browser download; files on disk are never written.
  */
 
 export interface PickedFile {
@@ -67,7 +68,7 @@ export async function pickFiles(): Promise<PickedFile[]> {
 export async function pickDirectory(): Promise<DirLike | null> {
   if (w?.showDirectoryPicker) {
     try {
-      const handle = await w.showDirectoryPicker({ mode: 'readwrite', id: 'nbt-world' });
+      const handle = await w.showDirectoryPicker({ mode: 'read', id: 'nbt-world' });
       return dirFromHandle(handle);
     } catch (e) {
       if (isAbort(e)) return null;
@@ -125,7 +126,7 @@ export function dirFromFileList(files: File[]): DirLike {
   return wrap(root);
 }
 
-/** Drag & drop: prefers FS handles (Chromium) so dropped files can be saved in place. */
+/** Drag & drop: prefers FS handles (Chromium), falls back to plain Files / webkit entries. */
 export async function itemsFromDrop(dt: DataTransfer): Promise<{ files: PickedFile[]; dirs: DirLike[] }> {
   const files: PickedFile[] = [];
   const dirs: DirLike[] = [];
@@ -179,26 +180,6 @@ function dirFromEntry(entry: FileSystemDirectoryEntry): DirLike {
         read();
       }),
   };
-}
-
-export async function ensureWritePermission(handle: FileSystemHandle): Promise<boolean> {
-  const h = handle as FileSystemHandle & {
-    queryPermission?: (d: { mode: string }) => Promise<PermissionState>;
-    requestPermission?: (d: { mode: string }) => Promise<PermissionState>;
-  };
-  if (!h.queryPermission) return true;
-  if ((await h.queryPermission({ mode: 'readwrite' })) === 'granted') return true;
-  return (await h.requestPermission?.({ mode: 'readwrite' })) === 'granted';
-}
-
-export async function writeToHandle(handle: FileSystemFileHandle, data: Blob): Promise<void> {
-  const writable = await (handle as FileSystemFileHandle & { createWritable(): Promise<FileSystemWritableFileStream> }).createWritable();
-  await writable.write(data);
-  await writable.close();
-}
-
-export function canWriteInPlace(handle?: FileSystemFileHandle): boolean {
-  return !!handle && 'createWritable' in handle;
 }
 
 /** Triggers a browser download. Blob URLs of a File stream from disk, so this costs no RAM. */
