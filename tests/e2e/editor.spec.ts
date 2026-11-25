@@ -43,6 +43,15 @@ test('empty state explains what to do', async ({ page }) => {
   await page.screenshot({ path: 'test-results/screens/01-empty.png' });
 });
 
+test('about dialog links to the source code', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTitle('About NBT-Editor').click();
+  const source = page.getByRole('link', { name: 'Source' });
+  await expect(source).toHaveAttribute('href', 'https://github.com/HazDu/NBT-Editor');
+  await expect(source).toHaveAttribute('target', '_blank');
+  await page.screenshot({ path: 'test-results/screens/00-about.png' });
+});
+
 test('open, edit, undo, search and download with backup', async ({ page }) => {
   const original = await levelDat();
   await page.goto('/');

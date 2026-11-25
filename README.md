@@ -1,7 +1,7 @@
 # NBT-Editor
 
 A modern, browser-based editor for Minecraft NBT data. It is a rewrite of the desktop app
-[NBTExplorer](NBTExplorer-master/) as a static website.
+NBTExplorer as a static website.
 
 **Your files never leave your device.** After the page has loaded, every file is parsed and edited inside the browser
 tab, and the result is handed back to you as a download; files on disk are never overwritten. The production build
@@ -89,6 +89,10 @@ npm run build      # static site in dist/
 
 `npm run build` produces a fully static `dist/` folder. Copy it to any static host: GitHub Pages, Netlify,
 Cloudflare Pages, nginx, an S3 bucket, and so on. Asset paths are relative, so serving it from a sub-path works.
+
+**GitHub Pages:** `.github/workflows/deploy-pages.yml` type-checks, tests, builds and deploys the site whenever a
+tag matching `release-*` is pushed (`git tag release-1.0.0 && git push origin release-1.0.0`). It can also be started
+by hand from the Actions tab.
 
 Serve it over **HTTPS**. Browsers only enable the service worker, the File System Access API and clipboard access in
 secure contexts (`localhost` counts as secure).

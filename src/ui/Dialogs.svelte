@@ -271,7 +271,11 @@
           also released under the MIT License. Icons: Material Symbols (Apache 2.0). Fonts: IBM Plex Sans, JetBrains Mono (OFL).
           Not affiliated with Mojang or Microsoft.</p>
       </div>
-      <div class="actions"><span class="grow"></span><button class="btn" onclick={close}>Close</button></div>
+      <div class="actions">
+        <a class="btn" href="https://github.com/HazDu/NBT-Editor" target="_blank" rel="noopener noreferrer"
+          title="View the source code on GitHub (opens a new tab)"><Icon name="code" size={16} /> Source</a>
+        <span class="grow"></span><button class="btn" onclick={close}>Close</button>
+      </div>
     </div>
   {/if}
 </dialog>
@@ -397,7 +401,7 @@
   .about img {
     image-rendering: pixelated;
   }
-  .about > div {
+  .about > div:not(.actions) {
     display: flex;
     flex-direction: column;
     gap: 10px;

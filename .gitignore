@@ -7,3 +7,5 @@ playwright-report/
 .DS_Store
 # Real Minecraft files dropped in for local testing (may contain private world data)
 tests/fixtures/private/
+.idea
+NBTExplorer-master/

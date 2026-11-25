@@ -84,6 +84,7 @@ kbd {
   background: var(--surface-2);
   color: var(--text);
   white-space: nowrap;
+  text-decoration: none;
   transition: background 0.12s, border-color 0.12s;
 }
 
