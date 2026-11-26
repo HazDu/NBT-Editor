@@ -52,6 +52,33 @@ test('about dialog links to the source code', async ({ page }) => {
   await page.screenshot({ path: 'test-results/screens/00-about.png' });
 });
 
+test('dialogs survive a text selection dragged onto the backdrop', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTitle('About NBT-Editor').click();
+  const dialog = page.locator('dialog[open]');
+  const panel = dialog.locator('.panel');
+  await expect(panel).toBeVisible();
+  const box = (await panel.boundingBox())!;
+  // Press inside the panel, release on the backdrop.
+  await page.mouse.move(box.x + 20, box.y + 40);
+  await page.mouse.down();
+  await page.mouse.move(5, 5, { steps: 5 });
+  await page.mouse.up();
+  await expect(dialog).toBeVisible();
+  // A real backdrop click still dismisses it.
+  await page.mouse.click(5, 5);
+  await expect(dialog).toHaveCount(0);
+});
+
+test('the + in the tab bar creates a new NBT file', async ({ page }) => {
+  await page.goto('/');
+  await dropFiles(page, [{ name: 'level.dat', data: await levelDat() }]);
+  await expect(page.getByRole('tab')).toHaveCount(1);
+  await page.locator('.tabs button.new').click();
+  await expect(page.getByRole('tab')).toHaveCount(2);
+  await expect(page.getByRole('tab', { name: /untitled\.dat/ })).toHaveAttribute('aria-selected', 'true');
+});
+
 test('open, edit, undo, search and download with backup', async ({ page }) => {
   const original = await levelDat();
   await page.goto('/');

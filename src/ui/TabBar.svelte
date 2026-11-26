@@ -38,7 +38,7 @@
       </button>
     </div>
   {/each}
-  <button class="new" title="Open files (Ctrl+O)" aria-label="Open files" onclick={() => commands.open.run()}><Icon name="add" size={18} /></button>
+  <button class="new" title="New NBT file (Alt+N)" aria-label="New NBT file" onclick={() => commands.newFile.run()}><Icon name="add" size={18} /></button>
 </div>
 
 <style>

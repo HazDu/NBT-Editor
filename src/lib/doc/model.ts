@@ -102,7 +102,11 @@ export function fileOf(n: SourceNode): FileNode | null {
 
 // ---------------------------------------------------------------------------------------- loading
 
-const NBT_FILE = /\.(dat|dat_old|dat_mcr|nbt|schematic|schem|litematic|mcstructure|bpt|rc)$/i;
+const NBT_EXTENSIONS = ['dat', 'dat_old', 'dat_mcr', 'nbt', 'schematic', 'schem', 'litematic', 'mcstructure', 'bpt', 'rc'];
+const NBT_FILE = new RegExp(`\\.(${NBT_EXTENSIONS.join('|')})$`, 'i');
+
+/** Extensions offered as the default filter in the "Open files" picker (users can still switch to all files). */
+export const OPEN_EXTENSIONS: readonly string[] = [...NBT_EXTENSIONS, 'mca', 'mcr'].map((e) => `.${e}`);
 
 export function isSupportedName(name: string): boolean {
   return NBT_FILE.test(name) || REGION_NAME.test(name);

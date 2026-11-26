@@ -35,11 +35,18 @@ function isAbort(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'AbortError' || e.name === 'SecurityError');
 }
 
-function pickViaInput(opts: { multiple?: boolean; directory?: boolean }): Promise<File[]> {
+/** Default picker filter; the OS dialog keeps an "All files" choice for custom extensions. */
+export interface FileFilter {
+  description: string;
+  extensions: readonly string[];
+}
+
+function pickViaInput(opts: { multiple?: boolean; directory?: boolean; filter?: FileFilter }): Promise<File[]> {
   return new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = !!opts.multiple;
+    if (opts.filter) input.accept = opts.filter.extensions.join(',');
     if (opts.directory) (input as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
     input.style.display = 'none';
     input.addEventListener('change', () => {
@@ -52,17 +59,29 @@ function pickViaInput(opts: { multiple?: boolean; directory?: boolean }): Promis
   });
 }
 
-export async function pickFiles(): Promise<PickedFile[]> {
+export async function pickFiles(filter?: FileFilter): Promise<PickedFile[]> {
   if (w?.showOpenFilePicker) {
     try {
-      const handles = await w.showOpenFilePicker({ multiple: true, id: 'nbt-open' });
+      const handles = await w.showOpenFilePicker({
+        multiple: true,
+        id: 'nbt-open',
+        excludeAcceptAllOption: false,
+        ...(filter && {
+          // Chromium rejects the whole call for extensions outside [A-Za-z0-9.+] or longer than 16 chars
+          // (e.g. ".dat_old"); those files stay reachable through the "All files" choice.
+          types: [{
+            description: filter.description,
+            accept: { 'application/octet-stream': filter.extensions.filter((e) => /^\.[a-z0-9.+]{1,15}$/i.test(e)) },
+          }],
+        }),
+      });
       return Promise.all(handles.map(async (handle) => ({ file: await handle.getFile(), handle })));
     } catch (e) {
       if (isAbort(e)) return [];
       throw e;
     }
   }
-  return (await pickViaInput({ multiple: true })).map((file) => ({ file }));
+  return (await pickViaInput({ multiple: true, filter })).map((file) => ({ file }));
 }
 
 export async function pickDirectory(): Promise<DirLike | null> {

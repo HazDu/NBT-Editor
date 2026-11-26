@@ -4,7 +4,7 @@
  */
 import * as actions from '../lib/doc/actions';
 import { copyItems, hasClipboard, itemsForPastedText, snbtFor } from '../lib/doc/clipboard';
-import { FolderNode, newEmptyFile, nodeForFile, Workspace } from '../lib/doc/model';
+import { FolderNode, newEmptyFile, nodeForFile, OPEN_EXTENSIONS, Workspace } from '../lib/doc/model';
 import { rowPath, type Row } from '../lib/doc/rows';
 import { pickDirectory, pickFiles, type DirLike, type PickedFile } from '../lib/fs/access';
 import { searchValueText } from '../lib/search/query';
@@ -86,7 +86,7 @@ export function openDirectory(dir: DirLike): void {
 
 async function openFiles(): Promise<void> {
   try {
-    openPicked(await pickFiles());
+    openPicked(await pickFiles({ description: 'Minecraft NBT files', extensions: OPEN_EXTENSIONS }));
   } catch (e) {
     app.toast('error', `Could not open: ${(e as Error).message}`);
   }

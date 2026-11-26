@@ -21,6 +21,7 @@
   });
 
   const close = () => (app.dialog = null);
+  let pressedBackdrop = false;
 
   // ------------------------------------------------------------------------- export
   let exportFiles = $state.raw<FileNode[]>([]);
@@ -139,7 +140,14 @@
   const groups = ['File', 'Edit', 'Tree', 'Search', 'View', 'Help'] as const;
 </script>
 
-<dialog bind:this={dlg} onclose={() => (app.dialog = null)} onclick={(e) => { if (e.target === dlg) close(); }}>
+<!-- Close on backdrop click only when the press also started on the backdrop: a text selection dragged
+     out of the panel ends with a click on the <dialog> itself and must not dismiss it. -->
+<dialog
+  bind:this={dlg}
+  onclose={() => (app.dialog = null)}
+  onpointerdown={(e) => (pressedBackdrop = e.target === dlg)}
+  onclick={(e) => { if (pressedBackdrop && e.target === dlg) close(); pressedBackdrop = false; }}
+>
   {#if d?.kind === 'export'}
     <div class="panel wide">
       <h2><Icon name="download" size={20} /> Download</h2>
